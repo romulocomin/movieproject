@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
+import './MovieRow.css';
 const customStyles = {
   content: {
     top: '50%',
@@ -11,7 +12,9 @@ const customStyles = {
     transform: 'translate(-50%, -50%)'
   }
 };
+
 Modal.setAppElement('body');
+
 class MovieRow extends React.Component {
 
   constructor() {
@@ -25,9 +28,9 @@ class MovieRow extends React.Component {
     this.afterOpenModal = this.afterOpenModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
   }
-/**
- * Funstions modal
- */
+  /**
+   * Functions modal
+   */
   openModal() {
     this.setState({ modalIsOpen: true });
   }
@@ -40,9 +43,9 @@ class MovieRow extends React.Component {
   closeModal() {
     this.setState({ modalIsOpen: false });
   }
-/**
- * end Funstions modal
- */
+  /**
+   * end Funstions modal
+   */
 
   render() {
     return <table id="row" key={this.props.movie.id}>
@@ -55,8 +58,8 @@ class MovieRow extends React.Component {
             <h3>{this.props.movie.title}</h3>
             <p><b>Release Date</b> - {this.props.movie.release_date}</p>
             <p><b>Genre</b>: {this.props.movie.genre}</p>
-            
-    
+
+
             <button onClick={this.openModal}>Details</button>
 
           </td>
@@ -75,9 +78,9 @@ class MovieRow extends React.Component {
             <td>
               <img alt="poster" width="120" src={this.props.movie.poster_src} />
             </td>
-            <td  >
+            <td className="details" >
               <h4>{this.props.movie.title}</h4>
-              <p>{this.props.movie.genre}</p>
+              
               <p><b>Release Date</b> - {this.props.movie.release_date}</p>
               <p><b>Genre</b>: {this.props.movie.genre}</p>
               <p>{this.props.movie.overview}</p>
