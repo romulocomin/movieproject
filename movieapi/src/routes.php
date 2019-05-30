@@ -16,67 +16,36 @@ return function (App $app) {
 
     $app->get('/mostpopular/[{page}]', function ($request, $response, $args) {
 
-
         /**
          * Request Genre list names
          */
 
-        $client2 = new GuzzleHttp\Client();
-
-        $genre = $client2->get('https://api.themoviedb.org/3/genre/movie/list?api_key=1b5adf76a72a13bad99b8fc0c68cb085&language=en-US');
-
-        $dataGenreNames = json_decode($genre->getBody()->getContents());
-      
-        $client = new GuzzleHttp\Client();
+        $dataGenreNames= dataGenreNames();
         
-
-        #----------end request genre----------------------#
 
         /**
-         * Request mostpopular
+         * Request UpcomingMovies
          */
+        $term="";
+        $datamovies = getDataMovies($term,$args['page']);
 
-        $responssse="";
-        $data="";
-        $page ="";
-        $page = $args['page'] ;
 
-        $responssse = $client->get('https://api.themoviedb.org/3/movie/upcoming?api_key=1b5adf76a72a13bad99b8fc0c68cb085&language=en-US&page='.$args['page']);
+        $genresmovie = $datamovies->results;
         
-        $data = json_decode($responssse->getBody()->getContents());
+        $total_pages="";
 
-        $genresmovie = $data->results;
-     
-        $total_pages =$data->total_pages;
-         #----------end request most popular----------------------#
+        $total_pages =$datamovies->total_pages;
 
+        
 
 
-        foreach ($genresmovie as $key => $value0) {
-            
-          $genre=  findNamesGenre($value0->genre_ids,$dataGenreNames);
-          
-            if($value0->poster_path!=""){
+        /**
+        *@param{$array, $array, $total_pages}
+        *mergeDataMovie
+        */
+        $arrayData = mergeDataMovie($genresmovie, $dataGenreNames, $total_pages);
 
-                $imgscr = "https://image.tmdb.org/t/p/w185".$value0->poster_path;
-
-            }else{
-                $imgscr ='https://t4.ftcdn.net/jpg/00/27/87/49/240_F_27874901_o1OlVbzf5RXayuWccfEsGsWZoEcxTdT7.jpg';
-            }
-
-            $newDate = date("m-d-Y", strtotime($value0->release_date));
-
-            $arrayData['results'][] = array(
-                'id'=>$value0->id,
-                'title'=>$value0->title,
-                'overview'=>$value0->overview,
-                'poster_path'=>$imgscr, 
-                'release_date'=>$newDate, 
-                'genre'=>$genre,
-                'total_pages'=>$total_pages 
-                 );
-
-        }
+        
 
         return $response->withJson($arrayData)
         ->withHeader('Access-Control-Allow-Origin', '*')
@@ -93,28 +62,97 @@ return function (App $app) {
      */
 
     $app->get('/moviesearch/[{term}]', function ($request, $response, $args) {
-      
-        $client = new GuzzleHttp\Client();
 
-        $resp="";
-        $data_m="";
+        /**
+         * Request Genre list names
+         */
 
-        $resp = $client->get('https://api.themoviedb.org/3/search/movie?api_key=1b5adf76a72a13bad99b8fc0c68cb085&query='.$args['term']);
+        $dataGenreNames= dataGenreNames();
         
-        $data_m = json_decode($resp->getBody()->getContents());
-      
-        return $response->withJson($data_m)
+
+        /**
+         * Request UpcomingMovies
+         */
+        $term="";
+        $datamovies = getDataMovies($args['term'],$term);
+
+
+        $genresmovie = $datamovies->results;
+        
+        $total_pages="";
+
+        $total_pages =$datamovies->total_pages;
+
+         /**
+        *@param{$array, $array, $total_pages}
+        *mergeDataMovie
+        */
+        $arrayData = mergeDataMovie($genresmovie, $dataGenreNames, $total_pages);
+
+        return $response->withJson($arrayData)
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 
     });
 
-    /**
-     *@param{array, array}
-     *Search function name by ids of movies
-     */
-    function findNamesGenre($arrayIdsGenre, $dataGenreNames){
+
+
+    #--------------End Route moviesearch------------------------------------------------#
+
+
+
+/**
+*   @param{}
+*   UpcomingMovies
+*/
+function  getDataMovies($term,$page){
+    $client = new GuzzleHttp\Client();
+        
+   
+    $responssse="";
+    $data="";
+    
+    $term0 = $term;
+
+    if($term==""){
+        $responssse = $client->get('https://api.themoviedb.org/3/movie/upcoming?api_key=1b5adf76a72a13bad99b8fc0c68cb085&language=en-US&page='.$page);
+        
+    }else{
+        $responssse = $client->get('https://api.themoviedb.org/3/search/movie?api_key=1b5adf76a72a13bad99b8fc0c68cb085&query='.$term0);
+    }
+
+
+   
+    
+    $data = json_decode($responssse->getBody()->getContents());
+
+    return $data;
+}
+    
+
+/**
+*   @param{}
+*   Get names of genres 
+*/
+function dataGenreNames(){
+
+    $client2 = new GuzzleHttp\Client();
+
+    $genre = $client2->get('https://api.themoviedb.org/3/genre/movie/list?api_key=1b5adf76a72a13bad99b8fc0c68cb085&language=en-US');
+
+    $GenreNames = json_decode($genre->getBody()->getContents());
+
+    return $GenreNames;
+}
+
+/**
+ *@param{array, array}
+*Search function name by ids of movies
+*/
+
+function findNamesGenre($arrayIdsGenre, $dataGenreNames){
+
         $itens[]="";
            
          foreach ($arrayIdsGenre as $key => $value1) {
@@ -137,4 +175,42 @@ return function (App $app) {
         return $itens;
         
     }
+
+/**
+ *@param{array, array, number}
+*  mergeDataMovie
+*/
+    
+function mergeDataMovie($genresmovie, $dataGenreNames, $total_pages){
+
+    foreach ($genresmovie as $key => $value0) {
+            
+        $genre=  findNamesGenre($value0->genre_ids,$dataGenreNames);
+        
+        if($value0->poster_path!=""){
+
+            $imgscr = "https://image.tmdb.org/t/p/w185".$value0->poster_path;
+
+        }else{
+            $imgscr ='https://t4.ftcdn.net/jpg/00/27/87/49/240_F_27874901_o1OlVbzf5RXayuWccfEsGsWZoEcxTdT7.jpg';
+        }
+
+        $newDate = date("m-d-Y", strtotime($value0->release_date));
+
+        $arrayData['results'][] = array(
+            'id'=>$value0->id,
+            'title'=>$value0->title,
+            'overview'=>$value0->overview,
+            'poster_path'=>$imgscr, 
+            'release_date'=>$newDate, 
+            'genre'=>$genre,
+            'total_pages'=>$total_pages 
+                );
+
+    }
+
+    return $arrayData;
+
+}
+
 };
