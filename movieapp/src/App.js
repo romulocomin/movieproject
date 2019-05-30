@@ -20,10 +20,12 @@ class App extends Component {
  * Function next page
  */
   nextPage = () => {
+   
     if (this.state.movies && this.state.page_num < this.state.total_pages) {
       this.setState({
         page_num: this.state.page_num += 1
       }, () => this.mostPopular(this.state.page_num))
+      
     }
   }
 /**
@@ -31,9 +33,11 @@ class App extends Component {
  */
   previousPage = () => {
     if (this.state.movies && this.state.page_num !== 1) {
+     
       this.setState({
         page_num: this.state.page_num -= 1
       }, () => this.mostPopular(this.state.page_num))
+
     }
   }
 
@@ -45,7 +49,7 @@ class App extends Component {
   mostPopular(page) {
 
     const pagesearch = page;
-    //https://api.themoviedb.org/3/movie/popular?api_key=1b5adf76a72a13bad99b8fc0c68cb085&language=en-US&page=
+    
     const urlString0 = "https://projapimovie.herokuapp.com/mostpopular/" + pagesearch;
     $.ajax({
       url: urlString0,
@@ -53,24 +57,24 @@ class App extends Component {
         console.log("Fetched data successfully")
 
         const results = searchResults.results;
-        //const genres= results[0].genre;
+      
+        var tpages =searchResults.results[0].total_pages;
 
-
-        this.setState({ total_pages: 992 });
+        this.setState({ total_pages: tpages });
 
         var movieRows = []
 
         if(results!=='undefined'){
             results.forEach((movie) => {
+             
               movie.poster_src = movie.poster_path
               movie.genre = movie.genre.join().substr(1);
-              console.log(movie.genre);
-
+             
               const movieRow = <MovieRow key={movie.id} movie={movie} />
               movieRows.push(movieRow)
             })
           }else{
-            console.log("vazio ou indedinido"+ JSON.stringify(searchResults) );
+            console.log("empty or undifined"+ JSON.stringify(searchResults) );
           }   
         this.setState({ rows: movieRows })
       },
@@ -87,7 +91,7 @@ class App extends Component {
    * 
    * @param {string} searchTerm 
    */
-  //https://api.themoviedb.org/3/search/movie?api_key=1b5adf76a72a13bad99b8fc0c68cb085&query="
+ 
   performSearch(searchTerm) {
     console.log("Perform search using moviedb")
     const urlString = "https://projapimovie.herokuapp.com/moviesearch/" + searchTerm;
@@ -95,8 +99,8 @@ class App extends Component {
     $.ajax({
       url: urlString,
       success: (searchResults) => {
-        console.log("Fetched data successfully")
-        console.log(searchResults);
+        console.log("Fetched data successfully");
+       
         const results = searchResults.results
 
 
@@ -104,13 +108,15 @@ class App extends Component {
         if(results!=='undefined'){
               results.forEach((movie) => 
                 {
-                movie.poster_src = "https://image.tmdb.org/t/p/w185" + movie.poster_path
-
+                movie.poster_src =  movie.poster_path;
+                
+                              
                 const movieRow = <MovieRow key={movie.id} movie={movie} />
+               
                 movieRows.push(movieRow)
                  })
             }else{
-              console.log("vazio ou indedinido"+JSON.stringify(searchResults) );
+              console.log("empty or undifined"+JSON.stringify(searchResults) );
             }
         this.setState({ rows: movieRows })
       },
