@@ -17,3 +17,6 @@ A technology that grows a lot and is certainly in the focus of multiplatform dev
 It was used Jquery lib to http requests with ajax to api php, and React-modal to movie overview informations
 
 The business logic in the front end is App.js  
+
+
+I'm not so familiar with the reaction to js, so I worried more about business logic then UI/UX 
